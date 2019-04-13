@@ -10,15 +10,19 @@
 
 #include <string>
 #include <cmath>
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
 #include <SDL/SDL_image.h>
+#include <GL\glut.h>
 
 #define PI 3.141592653589793
 
-unsigned Textures[3];
-unsigned BoxList(0);					//Added!
+const unsigned textureLength(6);
+unsigned Textures[textureLength];
 
 /* These will define the player's position and view angle. */
 double X(0.0), Y(0.0), Z(0.0);
@@ -26,6 +30,14 @@ double ViewAngleHor(0.0), ViewAngleVer(0.0);
 
 // Movements variables
 double movementSpeed(0.005);
+
+// Room properties
+double roomLength(16);
+double roomWidth(1800);
+double roomHeight(1000);
+
+// Orbits
+double moonOrbit(0);
 
 /*
  * DegreeToRadian
@@ -41,7 +53,7 @@ inline double DegreeToRadian(double degrees)
  *	This function will use SDL to load the specified image, create an OpenGL
  *	texture object from it and return the texture object number.
  */
-GLuint GrabTexObjFromFile(const std::string& fileName)
+GLuint GrabTexObjFromFile(const std::string& fileName, unsigned format)
 {
 	/* Use SDL_image to load the PNG image. */
 	SDL_Surface *Image = IMG_Load(fileName.c_str());
@@ -67,7 +79,7 @@ GLuint GrabTexObjFromFile(const std::string& fileName)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //NEW!
 
 	/* Create the actual texture object. */
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Image->w, Image->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, Image->pixels);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Image->w, Image->h, 0, format, GL_UNSIGNED_BYTE, Image->pixels);
 
 	/* Free the surface, we are finished with it. */
 	SDL_FreeSurface(Image);
@@ -79,10 +91,10 @@ GLuint GrabTexObjFromFile(const std::string& fileName)
  *	CompileLists
  *		Compiles the display lists used by our application.
  */
-void CompileLists()
+unsigned createBoxList()
 {
 	/* Let's generate a display list for a box. */
-	BoxList = glGenLists(1);
+	unsigned BoxList = glGenLists(1);
 	glNewList(BoxList, GL_COMPILE);
 
 		/*
@@ -127,6 +139,181 @@ void CompileLists()
 			glTexCoord2d(0, 1); glVertex3d(400, 475, 0.4);
 		glEnd();
 	glEndList();
+
+	return BoxList;
+}
+
+void DrawTable(unsigned int texture) {
+	// Material property
+	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
+	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tb_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tb_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
+	
+	// The four legs of the chair
+	glPushMatrix();
+
+	glTranslatef(200, 300, 0);
+	glRotatef(180, 1, 0, 0);
+
+	glScalef(20, 10, 0.05);
+
+	glPushMatrix();
+		GLUquadricObj *ob = gluNewQuadric();
+		glBindTexture(GL_TEXTURE_2D, texture);
+		gluQuadricTexture(ob, texture);
+		glPushMatrix();
+		glTranslatef(0, -20, -45);
+		glRotatef(-90, 1, 0, 0);
+		gluCylinder(ob, 0.5, 0.5, 10, 20, 20);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(1, -20, -53);
+		glRotatef(-90, 1, 0, 0);
+		gluCylinder(ob, 0.5, 0.5, 10, 20, 20);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(8, -20, -53);
+		glRotatef(-90, 1, 0, 0);
+		gluCylinder(ob, 0.5, 0.5, 10, 20, 20);
+		glPopMatrix();
+
+		glPushMatrix();
+		glTranslatef(8, -20, -45);
+		glRotatef(-90, 1, 0, 0);
+		gluCylinder(ob, 0.5, 0.5, 10, 20, 20);
+		glPopMatrix();
+
+		// Surface of the table
+		glPushMatrix();
+		glTranslatef(4, -9.5, -49);
+		glScalef(1, 0.1, 1);
+		glutSolidCube(10);
+		glPopMatrix();
+	glPopMatrix();
+
+
+	glPopMatrix();
+}
+
+
+void DrawEarth(double posX, double posY, double posZ) {
+	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
+	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tb_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tb_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
+
+	GLUquadricObj *ob = gluNewQuadric();
+	glBindTexture(GL_TEXTURE_2D, Textures[4]);
+	gluQuadricTexture(ob, Textures[4]);
+	
+	glPushMatrix();
+	glLoadIdentity();
+	glRotated(ViewAngleVer, 1, 0, 0);
+	glRotated(ViewAngleHor, 0, 1, 0);
+	glTranslated(-X, -Y, -Z);
+	
+	glRotatef(90, 1, 0, 0);
+	glTranslatef(posX, posY, posZ);
+	glScalef(-0.3, 0.3, 0.3);
+	gluSphere(ob, 1, 20, 20);
+	glPopMatrix();
+}
+
+void DrawMoon(double posX, double posY, double posZ) {
+	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
+	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tb_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tb_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
+
+	GLUquadricObj *ob = gluNewQuadric();
+	glBindTexture(GL_TEXTURE_2D, Textures[5]);
+	gluQuadricTexture(ob, Textures[5]);
+	glPushMatrix();
+
+	glLoadIdentity();
+	glRotated(ViewAngleVer, 1, 0, 0);
+	glRotated(ViewAngleHor, 0, 1, 0);
+	glTranslated(-X, -Y, -Z);
+	
+	glRotatef(90, 1, 0, 0);
+	moonOrbit = moonOrbit + 0.1;
+	if (moonOrbit > 360) {
+		moonOrbit = moonOrbit - 360;
+	}
+
+	
+	glTranslatef(posX, posY, posZ);
+	glRotatef(moonOrbit, 0, 0, 1);
+	glTranslatef(0.6, 0, 0);
+	glScalef(-0.1, 0.1, 0.1);
+
+	gluSphere(ob, 1, 20, 20);
+	glPopMatrix();
+}
+
+void MoonOrbit(double posX, double posY, double posZ) {
+	moonOrbit = moonOrbit + 0.1;
+	if (moonOrbit > 360) {
+		moonOrbit = moonOrbit - 360;
+	}
+
+	glRotatef(moonOrbit, 0, 1, 0);
+	glTranslatef(1, 0, 0);
+	DrawMoon(posX, posY, posZ);
+}
+
+void DrawAnimatedMoon(double posX, double posY, double posZ) {
+	// Draw a sphere with a eart texture
+	glPushMatrix();
+	DrawEarth(posX, posY, posZ);
+	MoonOrbit(posX, posY, posZ);
+	glPopMatrix();
+}
+
+void DrawBoxStack(unsigned boxList) {
+	/* Now we're going to render some boxes using display lists. */
+	glPushMatrix();
+		/* Let's make it a bit smaller... */
+		glScaled(0.5, 0.4, 0.5);
+
+		/* Can't bind textures while generating a display list, but we can give it texture coordinates and bind it now. */
+		glBindTexture(GL_TEXTURE_2D, Textures[2]);
+
+		/*
+		* Because display lists have preset coordinates, we'll need to translate it to move it around. Note that we're
+		* moving the small version of the cube around, not the big version (because we scaled *before* translating).
+		*/
+		glTranslated(-700, 750, 6);
+
+		/*
+		* Let's draw a whole lot of boxes. Note that because we're not pushing and popping matrices, translations
+		* and changes will 'accumulate' and add to the previous translation.
+		*/
+		for (short i(0); i < 12; ++i)
+		{
+			glTranslated(350, 0, 0);
+
+			/* These make sure that every once in a while, a new row is started. */
+			if (i == 5)		glTranslated(-1575, -350, 0);
+			if (i == 9)		glTranslated(-1225, -350, 0);
+
+			/*
+			* glCallList is all that is really needed to execute the display list. Remember to try the 'K' button
+			* to turn on wireframe mode, with these extra polygons, it looks pretty neat!
+			*/
+			glCallList(boxList);
+		}
+
+	glPopMatrix();
 }
 
 /*
@@ -135,6 +322,7 @@ void CompileLists()
  */
 void DrawRoom()
 {
+	glPushMatrix();
 	/* You also could do this at front by using the SDL surface's values or in an array. */
 	static float WallTexWidth(0.f);
 	static float WallTexHeight(0.f);
@@ -164,72 +352,61 @@ void DrawRoom()
 		Once = true;
 	}
 
-	glPushMatrix();
-
-		/* Move the world and rotate the view. */
-		glRotated(ViewAngleVer, 1, 0, 0);
-		glRotated(ViewAngleHor, 0, 1, 0);
-
-		glTranslated(-X, -Y, -Z);
-
-		/* Set the coordinate system. */
-		glOrtho(0, 800, 600, 0, -1, 1);
-
 		/* Draw walls. */
 		glBindTexture(GL_TEXTURE_2D, Textures[0]);
 
 		glBegin(GL_QUADS);
 			/* Wall in front of you when the app starts. */
 			glTexCoord2f(0, 0);
-			glVertex3d(-200,   0, 4.0);
+			glVertex3d(-500, 500 - roomHeight, roomLength/2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 0);
-			glVertex3d(1000,   0, 4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 400.f / WallTexHeight);
-			glVertex3d(1000, 500, 4.0);
+			glVertex3d(roomWidth - 500, 500, roomLength / 2.0);
 
 			glTexCoord2f(0, 400.f / WallTexHeight);
-			glVertex3d(-200, 500, 4.0);
+			glVertex3d(-500, 500, roomLength / 2.0);
 
 			/* Wall left of you. */
 			glTexCoord2f(0, 0);
-			glVertex3d(-200,   0,-4.0);
+			glVertex3d(-500, 500 - roomHeight,-roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 0);
-			glVertex3d(-200,   0, 4.0);
+			glVertex3d(-500, 500 - roomHeight, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 400.f / WallTexHeight);
-			glVertex3d(-200, 500, 4.0);
+			glVertex3d(-500, 500, roomLength / 2.0);
 
 			glTexCoord2f(0, 400.f / WallTexHeight);
-			glVertex3d(-200, 500,-4.0);
+			glVertex3d(-500, 500,-roomLength / 2.0);
 
 			/* Wall right of you. */
 			glTexCoord2f(0, 0);
-			glVertex3d(1000, 0, 4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 0);
-			glVertex3d(1000, 0,-4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight,-roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 400.f / WallTexHeight);
-			glVertex3d(1000, 500,-4.0);
+			glVertex3d(roomWidth - 500, 500,-roomLength / 2.0);
 
 			glTexCoord2f(0, 400.f / WallTexHeight);
-			glVertex3d(1000, 500, 4.0);
+			glVertex3d(roomWidth - 500, 500, roomLength / 2.0);
 
 			/* Wall behind you (you won't be able to see this just yet, but you will later). */
 			glTexCoord2f(0, 0);
-			glVertex3d(1000, 0,-4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight, -roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 0);
-			glVertex3d(-200, 0,-4.0);
+			glVertex3d(-500, 500 - roomHeight, -roomLength / 2.0);
 
 			glTexCoord2f(1200.f / WallTexWidth, 400.f / WallTexHeight);
-			glVertex3d(-200, 500,-4.0);
+			glVertex3d(-500, 500, -roomLength / 2.0);
 
 			glTexCoord2f(0, 400.f / WallTexHeight);
-			glVertex3d(1000, 500,-4.0);
+			glVertex3d(roomWidth - 500, 500, -roomLength / 2.0);
 		glEnd();
 
 		/* Draw the floor and the ceiling, this is done separatly because glBindTexture isn't allowed inside glBegin. */
@@ -237,68 +414,34 @@ void DrawRoom()
 
 		glBegin(GL_QUADS);
 			glTexCoord2f(0, 0);
-			glVertex3d(-200, 500, 4.0);
+			glVertex3d(-500, 500, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / FloorTexWidth, 0);
-			glVertex3d(1000, 500, 4.0);
+			glVertex3d(roomWidth - 500, 500, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / FloorTexWidth, (8.f / 2.f * 600.f) / FloorTexHeight);
-			glVertex3d(1000, 500,-4.0);
+			glVertex3d(roomWidth - 500, 500, -roomLength / 2.0);
 
 			glTexCoord2f(0, (8.f / 2.f * 600.f) / FloorTexHeight);
-			glVertex3d(-200, 500,-4.0);
+			glVertex3d(-500, 500, -roomLength / 2.0);
 
 			/* Ceiling. */
 			glTexCoord2f(0, 0);
-			glVertex3d(-200, 0, 4.0);
+			glVertex3d(-500, 500 - roomHeight, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / FloorTexWidth, 0);
-			glVertex3d(1000, 0, 4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight, roomLength / 2.0);
 
 			glTexCoord2f(1200.f / FloorTexWidth, (8.f / 2.f * 600.f) / FloorTexHeight);
-			glVertex3d(1000, 0,-4.0);
+			glVertex3d(roomWidth - 500, 500 - roomHeight, -roomLength / 2.0);
 
 			glTexCoord2f(0, (8.f / 2.f * 600.f)  / FloorTexHeight);
-			glVertex3d(-200, 0,-4.0);
+			glVertex3d(-500, 500 - roomHeight, -roomLength / 2.0);
 		glEnd();
 
-		/* Now we're going to render some boxes using display lists. */
-		glPushMatrix();
-			/* Let's make it a bit smaller... */
-			glScaled(0.5, 0.4, 0.5);
-
-			/* Can't bind textures while generating a display list, but we can give it texture coordinates and bind it now. */
-			glBindTexture(GL_TEXTURE_2D, Textures[2]);
-
-			/*
-			 * Because display lists have preset coordinates, we'll need to translate it to move it around. Note that we're
-			 * moving the small version of the cube around, not the big version (because we scaled *before* translating).
-			 */
-			glTranslated(-700, 750, 6);
-
-			/*
-			 * Let's draw a whole lot of boxes. Note that because we're not pushing and popping matrices, translations
-			 * and changes will 'accumulate' and add to the previous translation.
-			 */
-			for(short i(0); i < 12; ++i)
-			{
-				glTranslated(350, 0, 0);
-
-				/* These make sure that every once in a while, a new row is started. */
-				if(i == 5)		glTranslated(-1575, -350, 0);
-				if(i == 9)		glTranslated(-1225, -350, 0);
-
-				/*
-				 * glCallList is all that is really needed to execute the display list. Remember to try the 'K' button
-				 * to turn on wireframe mode, with these extra polygons, it looks pretty neat!
-				 */
-				glCallList(BoxList);
-			}
-			
 		glPopMatrix();
-
-	glPopMatrix();
 }
+
 
 int main(int argc, char **argv)
 {
@@ -313,23 +456,25 @@ int main(int argc, char **argv)
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
-	SDL_WM_SetCaption("OpenGL - Display Lists", 0);
+	SDL_WM_SetCaption("Computer Graphics Project", 0);
 	SDL_WM_GrabInput(SDL_GRAB_ON);
 
 	SDL_ShowCursor(SDL_DISABLE);
 
 	SDL_SetVideoMode(800, 600, 32, SDL_OPENGL);
 
+	
+
 	/* Basic OpenGL initialization, handled in 'The Screen'. */
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0, 0, 0, 1);
 
-	glViewport(0, 0, 1080, 600);
+	glViewport(0, 0, 800, 600);
 
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	gluPerspective(80.0, 800.0/600.0, 0.1, 100.0);
+	gluPerspective(80.0, 800.0/600.0, 0.1, 1000.0);
 
 	/* We now switch to the modelview matrix. */
 	glMatrixMode(GL_MODELVIEW);
@@ -350,9 +495,12 @@ int main(int argc, char **argv)
 
 	glColor4d(1, 1, 1, 1);
 
-	Textures[0] = GrabTexObjFromFile("Data/Wall.png");
-	Textures[1] = GrabTexObjFromFile("Data/Floor.png");
-	Textures[2] = GrabTexObjFromFile("Data/Box.png");			//Added!
+	Textures[0] = GrabTexObjFromFile("Data/Wall.png", GL_RGBA);
+	Textures[1] = GrabTexObjFromFile("Data/Floor.png", GL_RGBA);
+	Textures[2] = GrabTexObjFromFile("Data/Box.png", GL_RGBA);
+	Textures[3] = GrabTexObjFromFile("Data/Table.jpg", GL_RGB);
+	Textures[4] = GrabTexObjFromFile("Data/Earth.jpg", GL_RGB);
+	Textures[5] = GrabTexObjFromFile("Data/Moon.jpg", GL_RGB);
 
 	//Replaced this with a loop that immediately checks the entire array.
 	//sizeof(Textures) is the size of the entire array in bytes (unsigned int = 4 bytes)
@@ -371,7 +519,7 @@ int main(int argc, char **argv)
 	}
 
 	/* Compile the display lists. */
-	CompileLists();
+	unsigned boxList = createBoxList();
 
 	SDL_Event event;
 
@@ -425,7 +573,7 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_k)
 					glPolygonMode(GL_FRONT_AND_BACK, ((Wireframe = !Wireframe)? GL_LINE : GL_FILL));
 
-				if(event.key.keysym.sym == SDLK_w)			Keys[0] = true;
+				if(event.key.keysym.sym == SDLK_w)		Keys[0] = true;
 				if(event.key.keysym.sym == SDLK_s)		Keys[1] = true;
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = true;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = true;
@@ -433,7 +581,7 @@ int main(int argc, char **argv)
 
 			else if(event.type == SDL_KEYUP)
 			{
-				if(event.key.keysym.sym == SDLK_w)			Keys[0] = false;
+				if(event.key.keysym.sym == SDLK_w)		Keys[0] = false;
 				if(event.key.keysym.sym == SDLK_s)		Keys[1] = false;
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = false;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = false;
@@ -442,9 +590,31 @@ int main(int argc, char **argv)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
 		glPushMatrix();
-			DrawRoom();		
+			/* Move the world and rotate the view. */
+			glRotated(ViewAngleVer, 1, 0, 0);
+			glRotated(ViewAngleHor, 0, 1, 0);
+
+			glTranslated(-X, -Y, -Z);
+
+			/* Set the coordinate system. */
+			glOrtho(0, 800, 600, 0, -1, 1);
+			
+			// Draw the stuff we want to
+			// Default Room and boxes
+			DrawRoom();
+			DrawBoxStack(boxList);
+
+			// Draw the table should also take the position in the room
+			DrawTable(Textures[3]);
+			// Choose the position of the earth with the animated moon
+			DrawAnimatedMoon(0, -0.7, 0.1);
+
 		glPopMatrix();
+		
+
+
 
 		/* Move if the keys are pressed, this is explained in the tutorial. */
 		if(Keys[0])
@@ -476,8 +646,8 @@ int main(int argc, char **argv)
 	}
 
 	/* Delete the created textures. */
-	glDeleteTextures(3, Textures);		//Changed to 3.
-	glDeleteLists(BoxList, 1);
+	glDeleteTextures(textureLength, Textures);
+	glDeleteLists(boxList, 1);
 
 	/* Clean up. */
 	SDL_Quit();
