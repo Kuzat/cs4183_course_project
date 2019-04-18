@@ -21,7 +21,18 @@
 
 #define PI 3.141592653589793
 
-const unsigned textureLength(6);
+#define EARTH_TX		4
+#define MOON_TX			5
+#define JUPITER_TX		6
+#define MARS_TX			7
+#define MERCURY_TX		8
+#define NEPTUNE_TX		9
+#define SATURN_TX		10
+#define SATURN_RING_TX	11
+#define URANUS_TX		12
+#define VENUS_TX		13
+
+const unsigned textureLength(14);
 unsigned Textures[textureLength];
 
 /* These will define the player's position and view angle. */
@@ -32,12 +43,14 @@ double ViewAngleHor(0.0), ViewAngleVer(0.0);
 double movementSpeed(0.005);
 
 // Room properties
-double roomLength(16);
+double roomLength(32);
 double roomWidth(1800);
 double roomHeight(1000);
 
 // Orbits
 double moonOrbit(0);
+double planetSpinn(0);
+double ringSpin(0);
 
 /*
  * DegreeToRadian
@@ -201,7 +214,7 @@ void DrawTable(unsigned int texture) {
 }
 
 
-void DrawEarth(double posX, double posY, double posZ) {
+void DrawSpiningPlanet(double posX, double posY, double posZ, unsigned texture, double scale) {
 	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
 	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
 	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
@@ -210,19 +223,32 @@ void DrawEarth(double posX, double posY, double posZ) {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
 
 	GLUquadricObj *ob = gluNewQuadric();
-	glBindTexture(GL_TEXTURE_2D, Textures[4]);
-	gluQuadricTexture(ob, Textures[4]);
-	
+	glBindTexture(GL_TEXTURE_2D, texture);
+	gluQuadricTexture(ob, texture);
 	glPushMatrix();
+
 	glLoadIdentity();
 	glRotated(ViewAngleVer, 1, 0, 0);
 	glRotated(ViewAngleHor, 0, 1, 0);
 	glTranslated(-X, -Y, -Z);
-	
+
 	glRotatef(90, 1, 0, 0);
+	planetSpinn = planetSpinn - 0.1/(19*scale);
+	if (planetSpinn > 360) {
+		planetSpinn = planetSpinn - 360;
+	}
+
 	glTranslatef(posX, posY, posZ);
-	glScalef(-0.3, 0.3, 0.3);
+	glRotatef(planetSpinn, 0, 0, 1);
+	glScalef(-scale, scale, scale);
+
 	gluSphere(ob, 1, 20, 20);
+	glPopMatrix();
+}
+
+void DrawEarth(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[EARTH_TX], 0.3);
 	glPopMatrix();
 }
 
@@ -235,8 +261,8 @@ void DrawMoon(double posX, double posY, double posZ) {
 	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
 
 	GLUquadricObj *ob = gluNewQuadric();
-	glBindTexture(GL_TEXTURE_2D, Textures[5]);
-	gluQuadricTexture(ob, Textures[5]);
+	glBindTexture(GL_TEXTURE_2D, Textures[MOON_TX]);
+	gluQuadricTexture(ob, Textures[MOON_TX]);
 	glPushMatrix();
 
 	glLoadIdentity();
@@ -245,7 +271,7 @@ void DrawMoon(double posX, double posY, double posZ) {
 	glTranslated(-X, -Y, -Z);
 	
 	glRotatef(90, 1, 0, 0);
-	moonOrbit = moonOrbit + 0.1;
+	moonOrbit = moonOrbit - 0.006;
 	if (moonOrbit > 360) {
 		moonOrbit = moonOrbit - 360;
 	}
@@ -261,23 +287,94 @@ void DrawMoon(double posX, double posY, double posZ) {
 }
 
 void MoonOrbit(double posX, double posY, double posZ) {
-	moonOrbit = moonOrbit + 0.1;
-	if (moonOrbit > 360) {
-		moonOrbit = moonOrbit - 360;
-	}
-
-	glRotatef(moonOrbit, 0, 1, 0);
-	glTranslatef(1, 0, 0);
 	DrawMoon(posX, posY, posZ);
 }
 
-void DrawAnimatedMoon(double posX, double posY, double posZ) {
+// 
+/// Animated planets
+//
+void DrawAnimatedEarth(double posX, double posY, double posZ) {
 	// Draw a sphere with a eart texture
 	glPushMatrix();
 	DrawEarth(posX, posY, posZ);
 	MoonOrbit(posX, posY, posZ);
 	glPopMatrix();
 }
+
+void DrawAnimatedMars(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[MARS_TX], 0.29);
+	glPopMatrix();
+}
+
+void DrawAnimatedJupiter(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[JUPITER_TX], 0.9);
+	glPopMatrix();
+}
+
+void DrawAnimatedMercury(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[MERCURY_TX], 0.2);
+	glPopMatrix();
+}
+
+void DrawAnimatedNeptune(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[NEPTUNE_TX], 0.5);
+	glPopMatrix();
+}
+
+void DrawAnimatedSaturn(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[SATURN_TX], 0.7);
+
+	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
+	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tb_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tb_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
+
+	GLUquadricObj *ob = gluNewQuadric();
+	glBindTexture(GL_TEXTURE_2D, Textures[SATURN_RING_TX]);
+	gluQuadricTexture(ob, Textures[SATURN_RING_TX]);
+	glPushMatrix();
+
+	glLoadIdentity();
+	glRotated(ViewAngleVer, 1, 0, 0);
+	glRotated(ViewAngleHor, 0, 1, 0);
+	glTranslated(-X, -Y, -Z);
+
+	glRotatef(90, 1, 0, 0);
+	ringSpin = ringSpin - 0.01;
+	if (ringSpin > 360) {
+		ringSpin = ringSpin - 360;
+	}
+
+
+	glTranslatef(posX, posY, posZ);
+	glRotatef(ringSpin, 0, 0, 1);
+	glScalef(-1, 1, 1);
+
+	gluDisk(ob, 0.8, 1.2, 20, 20);
+	glPopMatrix();
+
+	glPopMatrix();
+}
+
+void DrawAnimatedUranus(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[URANUS_TX], 0.45);
+	glPopMatrix();
+}
+
+void DrawAnimatedVenus(double posX, double posY, double posZ) {
+	glPushMatrix();
+	DrawSpiningPlanet(posX, posY, posZ, Textures[VENUS_TX], 0.28);
+	glPopMatrix();
+}
+
 
 void DrawBoxStack(unsigned boxList) {
 	/* Now we're going to render some boxes using display lists. */
@@ -292,7 +389,7 @@ void DrawBoxStack(unsigned boxList) {
 		* Because display lists have preset coordinates, we'll need to translate it to move it around. Note that we're
 		* moving the small version of the cube around, not the big version (because we scaled *before* translating).
 		*/
-		glTranslated(-700, 750, 6);
+		glTranslated(-700, 750, 10);
 
 		/*
 		* Let's draw a whole lot of boxes. Note that because we're not pushing and popping matrices, translations
@@ -501,6 +598,14 @@ int main(int argc, char **argv)
 	Textures[3] = GrabTexObjFromFile("Data/Table.jpg", GL_RGB);
 	Textures[4] = GrabTexObjFromFile("Data/Earth.jpg", GL_RGB);
 	Textures[5] = GrabTexObjFromFile("Data/Moon.jpg", GL_RGB);
+	Textures[6] = GrabTexObjFromFile("Data/Jupiter.jpg", GL_RGB);
+	Textures[7] = GrabTexObjFromFile("Data/Mars.jpg", GL_RGB);
+	Textures[8] = GrabTexObjFromFile("Data/Mercury.jpg", GL_RGB);
+	Textures[9] = GrabTexObjFromFile("Data/Neptune.jpg", GL_RGB);
+	Textures[10] = GrabTexObjFromFile("Data/Saturn.jpg", GL_RGB);
+	Textures[11] = GrabTexObjFromFile("Data/Saturn_ring.png", GL_RGBA);
+	Textures[12] = GrabTexObjFromFile("Data/Uranus.jpg", GL_RGB);
+	Textures[13] = GrabTexObjFromFile("Data/Venus.jpg", GL_RGB);
 
 	//Replaced this with a loop that immediately checks the entire array.
 	//sizeof(Textures) is the size of the entire array in bytes (unsigned int = 4 bytes)
@@ -609,7 +714,14 @@ int main(int argc, char **argv)
 			// Draw the table should also take the position in the room
 			DrawTable(Textures[3]);
 			// Choose the position of the earth with the animated moon
-			DrawAnimatedMoon(0, -0.7, 0.1);
+			DrawAnimatedMercury(0, -4, 0.1);
+			DrawAnimatedVenus(0, -2, 0.1);
+			DrawAnimatedEarth(0, 0, 0.1);
+			DrawAnimatedMars(0, 2, 0.1);
+			DrawAnimatedJupiter(0, 4, 0.1);
+			DrawAnimatedSaturn(0, 6, 0.1);
+			DrawAnimatedUranus(0, 8, 0.1);
+			DrawAnimatedNeptune(0, 10, 0.1);
 
 		glPopMatrix();
 		
