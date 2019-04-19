@@ -540,6 +540,8 @@ void DrawRoom()
 }
 
 
+
+
 int main(int argc, char **argv)
 {
 	/* Initialize SDL and set up a window. */
@@ -559,6 +561,7 @@ int main(int argc, char **argv)
 	SDL_ShowCursor(SDL_DISABLE);
 
 	SDL_SetVideoMode(800, 600, 32, SDL_OPENGL);
+
 
 	
 
@@ -632,7 +635,7 @@ int main(int argc, char **argv)
 	int MovementDelay(SDL_GetTicks());
 
 	bool Wireframe(false);
-	bool Keys[4] =
+	bool Keys[6] =
 	{
 		false, /* Up arrow down? */
 		false, /* Down arrow down? */
@@ -682,6 +685,10 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_s)		Keys[1] = true;
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = true;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = true;
+
+				//q event
+				if(event.key.keysym.sym == SDLK_q)		Keys[4] = true;
+				if(event.key.keysym.sym == SDLK_e)		Keys[5] = true;
 			}
 
 			else if(event.type == SDL_KEYUP)
@@ -690,6 +697,10 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_s)		Keys[1] = false;
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = false;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = false;
+
+				//q event
+				if(event.key.keysym.sym == SDLK_q)		Keys[4] = false;
+				if(event.key.keysym.sym == SDLK_e)		Keys[5] = false;
 			}
 		}
 
@@ -753,9 +764,23 @@ int main(int argc, char **argv)
 			Z -= sin(DegreeToRadian(ViewAngleHor + 180.0)) * movementSpeed;
 		}
 
+		//q response: go up
+		if(Keys[4])
+		{
+			Y += sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
+		}
+
+		//e response: go down
+		if(Keys[5])
+		{
+			Y -= sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
+		}
+
 		/* Swap the display buffers. */
 		SDL_GL_SwapBuffers();
 	}
+
+
 
 	/* Delete the created textures. */
 	glDeleteTextures(textureLength, Textures);
