@@ -635,7 +635,7 @@ int main(int argc, char **argv)
 	int MovementDelay(SDL_GetTicks());
 
 	bool Wireframe(false);
-	bool Keys[6] =
+	bool Keys[7] =
 	{
 		false, /* Up arrow down? */
 		false, /* Down arrow down? */
@@ -687,8 +687,9 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = true;
 
 				//q event
-				if(event.key.keysym.sym == SDLK_q)		Keys[4] = true;
-				if(event.key.keysym.sym == SDLK_e)		Keys[5] = true;
+				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = true;
+				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = true;
+				if(event.key.keysym.sym == SDLK_GREATER)		Keys[6] = true;
 			}
 
 			else if(event.type == SDL_KEYUP)
@@ -699,8 +700,9 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = false;
 
 				//q event
-				if(event.key.keysym.sym == SDLK_q)		Keys[4] = false;
-				if(event.key.keysym.sym == SDLK_e)		Keys[5] = false;
+				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = false;
+				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = false;
+				if(event.key.keysym.sym == SDLK_GREATER)		Keys[6] = false;
 			}
 		}
 
@@ -774,6 +776,13 @@ int main(int argc, char **argv)
 		if(Keys[5])
 		{
 			Y -= sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
+		}
+
+		//e response: go down
+		if (Keys[6])
+		{
+			ViewAngleHor -= 1.0;
+			ViewAngleVer -= 1.0;
 		}
 
 		/* Swap the display buffers. */
