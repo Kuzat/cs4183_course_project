@@ -578,7 +578,7 @@ int main(int argc, char **argv)
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
 
 	//light position x, y, z, w 
-	GLfloat lightposition[] = { 0, 16, 1000, 1.0 };
+	GLfloat lightposition[] = { 0.0f, -5.0f, -80.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, lightposition);
 
 	
@@ -749,8 +749,8 @@ int main(int argc, char **argv)
 			DrawAnimatedVenus(0, -2, 0.1);
 			DrawAnimatedEarth(0, 0, 0.1);
 			DrawAnimatedMars(0, 2, 0.1);
-			DrawAnimatedJupiter(0, 4, 0.1);
-			DrawAnimatedSaturn(0, 6, 0.1);
+			DrawAnimatedJupiter(0, 4, -0.3);
+			DrawAnimatedSaturn(0, 6, -0.1);
 			DrawAnimatedUranus(0, 8, 0.1);
 			DrawAnimatedNeptune(0, 10, 0.1);
 
