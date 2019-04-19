@@ -563,6 +563,24 @@ int main(int argc, char **argv)
 	SDL_SetVideoMode(800, 600, 32, SDL_OPENGL);
 
 
+
+	/* Lighting Tests */
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
+
+	//lighting intensity and color
+	GLfloat ambient[] = { 0.8, 0.8, 0.1, 1.0 }; //set R, B, G same value to make white
+	GLfloat diffuse[] = { 0.2, 0.2, 0.8, 1.0 }; //best for ambient + diffuse = 1.0
+	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
+
+	//light position
+	GLfloat lightposition[] = { 800.0, 600.0, 100.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_POSITION, lightposition);
+
 	
 
 	/* Basic OpenGL initialization, handled in 'The Screen'. */
@@ -689,7 +707,7 @@ int main(int argc, char **argv)
 				//q event
 				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = true;
 				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = true;
-				if(event.key.keysym.sym == SDLK_GREATER)		Keys[6] = true;
+				if(event.key.keysym.sym == SDLK_q)		Keys[6] = true;
 			}
 
 			else if(event.type == SDL_KEYUP)
@@ -702,7 +720,7 @@ int main(int argc, char **argv)
 				//q event
 				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = false;
 				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = false;
-				if(event.key.keysym.sym == SDLK_GREATER)		Keys[6] = false;
+				if(event.key.keysym.sym == SDLK_q)		Keys[6] = false;
 			}
 		}
 
@@ -778,11 +796,15 @@ int main(int argc, char **argv)
 			Y -= sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
 		}
 
-		//e response: go down
+		//e response: zoom in/out
 		if (Keys[6])
 		{
-			ViewAngleHor -= 1.0;
-			ViewAngleVer -= 1.0;
+			glEnable(GL_LIGHTING);
+			glEnable(GL_LIGHT0);
+		}
+		else {
+			glDisable(GL_LIGHTING);
+			glDisable(GL_LIGHT0);
 		}
 
 		/* Swap the display buffers. */
