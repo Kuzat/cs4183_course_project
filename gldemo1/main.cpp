@@ -31,8 +31,9 @@
 #define SATURN_RING_TX	11
 #define URANUS_TX		12
 #define VENUS_TX		13
+#define METEOR_TX		14
 
-const unsigned textureLength(14);
+const unsigned textureLength(15);
 unsigned Textures[textureLength];
 
 /* These will define the player's position and view angle. */
@@ -51,6 +52,7 @@ double roomHeight(1000);
 double moonOrbit(0);
 double planetSpinn(0);
 double ringSpin(0);
+
 
 /*
  * DegreeToRadian
@@ -294,7 +296,7 @@ void MoonOrbit(double posX, double posY, double posZ) {
 /// Animated planets
 //
 void DrawAnimatedEarth(double posX, double posY, double posZ) {
-	// Draw a sphere with a eart texture
+	//   a sphere with a eart texture
 	glPushMatrix();
 	DrawEarth(posX, posY, posZ);
 	MoonOrbit(posX, posY, posZ);
@@ -375,6 +377,33 @@ void DrawAnimatedVenus(double posX, double posY, double posZ) {
 	glPopMatrix();
 }
 
+void DrawMeteor(double posX, double posY, double posZ) {
+	GLfloat tb_ambient[] = { 0.05, 0.05, 0.05, 1 };
+	GLfloat tb_diffuse[] = { 0.8, 0.8, 0.8, 1 };
+	GLfloat tb_specular[] = { 0.6, 0.6, 0.6, 1 };
+	glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, tb_ambient);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tb_diffuse);
+	glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, tb_specular);
+
+	GLUquadricObj *ob = gluNewQuadric();
+	glBindTexture(GL_TEXTURE_2D, Textures[METEOR_TX]);
+	gluQuadricTexture(ob, Textures[METEOR_TX]);
+	glPushMatrix();
+
+	glLoadIdentity();
+	glRotated(ViewAngleVer, 1, 0, 0);
+	glRotated(ViewAngleHor, 0, 1, 0);
+	glTranslated(-X, -Y, -Z);
+
+	glRotatef(90, 1, 0, 0);
+
+
+	glTranslatef(posX, posY, posZ);
+	glScalef(-0.075, 0.055, 0.055);
+
+	gluSphere(ob, 1, 20, 20);
+	glPopMatrix();
+}
 
 void DrawBoxStack(unsigned boxList) {
 	/* Now we're going to render some boxes using display lists. */
@@ -540,6 +569,38 @@ void DrawRoom()
 }
 
 
+/*
+Render Text for Score Keeping
+*/
+void drawBitmapText()
+{
+	// The character array to hole the string
+	char text[] = "HELLO WORLD";
+	// The color, red for me
+	glColor3f(1.0, 0.0, 1.0);
+	// Position of the text to be printer
+	glRasterPos3f(0,0,0);
+	for (int i = 0; text[i] != '\0'; i++)
+		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+}
+
+
+void render(void)
+{
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glLoadIdentity();
+
+	// Write the text before any transformation or rotation
+	// Or the text will change its position with the models
+	drawBitmapText();
+
+
+	glFlush();
+	glutSwapBuffers();
+}
+
+
+
 void lightSettings() {
 	/* Lighting Tests */
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
@@ -629,6 +690,7 @@ int main(int argc, char **argv)
 	Textures[11] = GrabTexObjFromFile("Data/Saturn_ring.png", GL_RGBA);
 	Textures[12] = GrabTexObjFromFile("Data/Uranus.jpg", GL_RGB);
 	Textures[13] = GrabTexObjFromFile("Data/Venus.jpg", GL_RGB);
+	Textures[14] = GrabTexObjFromFile("Data/Meteor.jpg", GL_RGB);
 
 	//Replaced this with a loop that immediately checks the entire array.
 	//sizeof(Textures) is the size of the entire array in bytes (unsigned int = 4 bytes)
@@ -670,6 +732,8 @@ int main(int argc, char **argv)
 		if (SDL_MOUSEBUTTONDOWN) {
 			int mx = event.button.x;
 			int my = event.button.y;
+			printf("%d", mx);
+			printf("%d", my);
 		}
 
 		/* Handle events with SDL. */
@@ -763,6 +827,12 @@ int main(int argc, char **argv)
 			DrawAnimatedSaturn(0, 6, -0.1);
 			DrawAnimatedUranus(0, 8, 0.1);
 			DrawAnimatedNeptune(0, 10, 0.1);
+
+			DrawMeteor(1, 8.2, -0.3);
+			DrawMeteor(-2, 2.7, 0.1);
+			DrawMeteor(1.4, -1.3, -0.1);
+			DrawMeteor(-1.2, -3.8, -0.7);
+			DrawMeteor(0.1, 13, 0.4);
 
 			//light position x, y, z, w 
 			//float light_pos[] = { 100.0f, -5.0f, -80.0f, 1.0f };
