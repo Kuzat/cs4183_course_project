@@ -36,7 +36,7 @@ const unsigned textureLength(14);
 unsigned Textures[textureLength];
 
 /* These will define the player's position and view angle. */
-double X(0.0), Y(0.0), Z(0.0);
+double X(0.0), Y(0.0), Z(-7.5);
 double ViewAngleHor(0.0), ViewAngleVer(0.0);
 
 // Movements variables
@@ -547,14 +547,27 @@ void lightSettings() {
 	glDisable(GL_LIGHT0);
 
 	//lighting intensity and color
+
+	//Lighting that replicates the Sun
 	GLfloat ambient[] = { 0.8, 0.8, 0.1, 1.0 }; //set R, B, G same value to make white
 	GLfloat diffuse[] = { 0.2, 0.2, 0.8, 1.0 }; //best for ambient + diffuse = 1.0
 	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
+
+	//Spotlights
+
 }
 
+
+/*
+Mouse Click Events
+buttot pressed, state of button, xy coordinates of clicked area
+*/
+void mouseClick(int button, int state, int x, int y) {
+
+}
 
 
 
@@ -580,7 +593,6 @@ int main(int argc, char **argv)
 
 	lightSettings();
 	
-
 	/* Basic OpenGL initialization, handled in 'The Screen'. */
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0, 0, 0, 1);
@@ -611,8 +623,10 @@ int main(int argc, char **argv)
 
 	glColor4d(1, 1, 1, 1);
 
-	Textures[0] = GrabTexObjFromFile("Data/Wall.png", GL_RGBA);
-	Textures[1] = GrabTexObjFromFile("Data/Floor.png", GL_RGBA);
+	//Textures[0] = GrabTexObjFromFile("Data/Wall.png", GL_RGBA);
+	//Textures[1] = GrabTexObjFromFile("Data/Floor.png", GL_RGBA);
+	Textures[0] = GrabTexObjFromFile("Data/Stars.jpg", GL_RGBA);
+	Textures[1] = GrabTexObjFromFile("Data/altFloor.jpg", GL_RGBA);
 	Textures[2] = GrabTexObjFromFile("Data/Box.png", GL_RGBA);
 	Textures[3] = GrabTexObjFromFile("Data/Table.jpg", GL_RGB);
 	Textures[4] = GrabTexObjFromFile("Data/Earth.jpg", GL_RGB);
