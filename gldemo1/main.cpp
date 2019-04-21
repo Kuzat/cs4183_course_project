@@ -788,13 +788,13 @@ int main(int argc, char **argv)
 			Z -= sin(DegreeToRadian(ViewAngleHor + 180.0)) * movementSpeed;
 		}
 
-		//q response: go up
+		//SPACEBAR response: go up
 		if(Keys[4])
 		{
 			Y += sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
 		}
 
-		//e response: go down
+		//LSHIFT response: go down
 		if(Keys[5])
 		{
 			Y -= sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
@@ -803,12 +803,14 @@ int main(int argc, char **argv)
 		//e response: zoom in/out
 		if (Keys[6])
 		{
-			glEnable(GL_LIGHTING);
-			glEnable(GL_LIGHT0);
-		}
-		else {
-			glDisable(GL_LIGHTING);
-			glDisable(GL_LIGHT0);
+			if (glIsEnabled(GL_LIGHT0)) {
+				glDisable(GL_LIGHTING);
+				glDisable(GL_LIGHT0);
+			}
+			else {
+				glEnable(GL_LIGHTING);
+				glEnable(GL_LIGHT0);
+			}
 		}
 
 		/* Swap the display buffers. */
