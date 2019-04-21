@@ -389,7 +389,7 @@ void DrawBoxStack(unsigned boxList) {
 		* Because display lists have preset coordinates, we'll need to translate it to move it around. Note that we're
 		* moving the small version of the cube around, not the big version (because we scaled *before* translating).
 		*/
-		glTranslated(-700, 750, 10);
+		glTranslated(-700, 750, 20);
 
 		/*
 		* Let's draw a whole lot of boxes. Note that because we're not pushing and popping matrices, translations
@@ -540,6 +540,22 @@ void DrawRoom()
 }
 
 
+void lightSettings() {
+	/* Lighting Tests */
+	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
+	glDisable(GL_LIGHTING);
+	glDisable(GL_LIGHT0);
+
+	//lighting intensity and color
+	GLfloat ambient[] = { 0.8, 0.8, 0.1, 1.0 }; //set R, B, G same value to make white
+	GLfloat diffuse[] = { 0.2, 0.2, 0.8, 1.0 }; //best for ambient + diffuse = 1.0
+	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
+	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
+}
+
+
 
 
 int main(int argc, char **argv)
@@ -562,25 +578,7 @@ int main(int argc, char **argv)
 
 	SDL_SetVideoMode(800, 600, 32, SDL_OPENGL);
 
-
-
-	/* Lighting Tests */
-	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
-	glDisable(GL_LIGHTING);
-	glDisable(GL_LIGHT0);
-
-	//lighting intensity and color
-	GLfloat ambient[] = { 0.8, 0.8, 0.1, 1.0 }; //set R, B, G same value to make white
-	GLfloat diffuse[] = { 0.2, 0.2, 0.8, 1.0 }; //best for ambient + diffuse = 1.0
-	GLfloat specular[] = { 1.0, 1.0, 1.0, 1.0 };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
-
-	//light position x, y, z, w 
-	GLfloat lightposition[] = { 0.0f, -5.0f, -80.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, lightposition);
-
+	lightSettings();
 	
 
 	/* Basic OpenGL initialization, handled in 'The Screen'. */
@@ -754,8 +752,9 @@ int main(int argc, char **argv)
 			DrawAnimatedUranus(0, 8, 0.1);
 			DrawAnimatedNeptune(0, 10, 0.1);
 
-			//move light fixture
-			float light_pos[] = { 0.0f, -5.0f, -80.0f, 1.0f };
+			//light position x, y, z, w 
+			//float light_pos[] = { 100.0f, -5.0f, -80.0f, 1.0f };
+			float light_pos[] = { 900.0, 500.0, 32.0, 1.0 };
 			glLightfv(GL_LIGHT0,GL_POSITION, light_pos);
 
 		glPopMatrix();
@@ -791,13 +790,13 @@ int main(int argc, char **argv)
 		//SPACEBAR response: go up
 		if(Keys[4])
 		{
-			Y += sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
+			Y += 1 * movementSpeed;
 		}
 
 		//LSHIFT response: go down
 		if(Keys[5])
 		{
-			Y -= sin(DegreeToRadian(ViewAngleHor + 90.0)) * movementSpeed;
+			Y -= 1 * movementSpeed;
 		}
 
 		//e response: zoom in/out
