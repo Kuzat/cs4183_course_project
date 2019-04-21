@@ -397,7 +397,6 @@ void DrawMeteor(double posX, double posY, double posZ) {
 
 	glRotatef(90, 1, 0, 0);
 
-
 	glTranslatef(posX, posY, posZ);
 	glScalef(-0.075, 0.055, 0.055);
 
@@ -616,9 +615,6 @@ void lightSettings() {
 	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 	glLightfv(GL_LIGHT0, GL_DIFFUSE, specular);
-
-	//Spotlights
-
 }
 
 
@@ -725,17 +721,14 @@ int main(int argc, char **argv)
 		false  /* Right arrow down? */
 	};
 
+	// Meteor Status, all meteors are true (exist) by default
+	bool MeteorStatus[6] = {
+		true, true, true, true, true, true
+	};
+
 	/* Application loop. */
 	for(;;)
 	{
-		//Catch Mouse events
-		if (SDL_MOUSEBUTTONDOWN) {
-			int mx = event.button.x;
-			int my = event.button.y;
-			printf("%d", mx);
-			printf("%d", my);
-		}
-
 		/* Handle events with SDL. */
 		if(SDL_PollEvent(&event))
 		{
@@ -763,6 +756,19 @@ int main(int argc, char **argv)
 				SDL_Delay(5);
 			}
 
+			//Catch Mouse clicks events
+			else if (event.type == SDL_MOUSEBUTTONDOWN) {
+				int mx = event.button.x;
+				int my = event.button.y;
+				//printf(" x = %d ", mx);
+				//printf(" y = %d ", my);
+				
+				printf("before%d ", MeteorStatus[0]);
+				MeteorStatus[0] == false;
+				printf("after%d ", MeteorStatus[0]);
+				DrawMeteor(-1.2, -3.8, -0.7);
+			}
+
 			else if(event.type == SDL_KEYDOWN)
 			{
 				if(event.key.keysym.sym == SDLK_ESCAPE)
@@ -776,7 +782,7 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = true;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = true;
 
-				//q event
+				//added events
 				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = true;
 				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = true;
 				if(event.key.keysym.sym == SDLK_q)		Keys[6] = true;
@@ -789,7 +795,7 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_a)		Keys[2] = false;
 				if(event.key.keysym.sym == SDLK_d)		Keys[3] = false;
 
-				//q event
+				//added events
 				if(event.key.keysym.sym == SDLK_SPACE)		Keys[4] = false;
 				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = false;
 				if(event.key.keysym.sym == SDLK_q)		Keys[6] = false;
@@ -828,11 +834,14 @@ int main(int argc, char **argv)
 			DrawAnimatedUranus(0, 8, 0.1);
 			DrawAnimatedNeptune(0, 10, 0.1);
 
-			DrawMeteor(1, 8.2, -0.3);
+			if (MeteorStatus[0] == false) {
+				printf(" redraw ");
+				DrawMeteor(-1.2, -3.8, -0.7);
+			}
 			DrawMeteor(-2, 2.7, 0.1);
 			DrawMeteor(1.4, -1.3, -0.1);
-			DrawMeteor(-1.2, -3.8, -0.7);
 			DrawMeteor(0.1, 13, 0.4);
+			DrawMeteor(1, 8.2, -0.3);
 
 			//light position x, y, z, w 
 			//float light_pos[] = { 100.0f, -5.0f, -80.0f, 1.0f };
@@ -881,7 +890,7 @@ int main(int argc, char **argv)
 			Y -= 1 * movementSpeed;
 		}
 
-		//e response: zoom in/out
+		//e response: turn light on/off
 		if (Keys[6])
 		{
 			if (glIsEnabled(GL_LIGHT0)) {
