@@ -168,7 +168,7 @@ void DrawTable(unsigned int texture) {
 	// The four legs of the chair
 	glPushMatrix();
 
-	glTranslatef(200, 300, 0);
+	glTranslatef(200, 300, 10);
 	glRotatef(180, 1, 0, 0);
 
 	glScalef(20, 10, 0.05);
