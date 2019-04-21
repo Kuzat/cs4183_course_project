@@ -561,16 +561,6 @@ void lightSettings() {
 }
 
 
-/*
-Mouse Click Events
-buttot pressed, state of button, xy coordinates of clicked area
-*/
-void mouseClick(int button, int state, int x, int y) {
-
-}
-
-
-
 int main(int argc, char **argv)
 {
 	/* Initialize SDL and set up a window. */
@@ -676,6 +666,12 @@ int main(int argc, char **argv)
 	/* Application loop. */
 	for(;;)
 	{
+		//Catch Mouse events
+		if (SDL_MOUSEBUTTONDOWN) {
+			int mx = event.button.x;
+			int my = event.button.y;
+		}
+
 		/* Handle events with SDL. */
 		if(SDL_PollEvent(&event))
 		{
@@ -734,6 +730,8 @@ int main(int argc, char **argv)
 				if(event.key.keysym.sym == SDLK_LSHIFT)		Keys[5] = false;
 				if(event.key.keysym.sym == SDLK_q)		Keys[6] = false;
 			}
+			
+
 		}
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
