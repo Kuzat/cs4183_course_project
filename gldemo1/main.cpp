@@ -690,8 +690,9 @@ int main(int argc, char **argv)
 	};
 
 	// Meteor Status, all meteors are true (exist) by default
-	bool MeteorStatus[6] = {
-		true, true, true, true, true, true
+	bool MeteorStatus[20] = {
+		true, true, true, true, true, true, true, true, true, true,
+		true, true, true, true, true, true, true, true, true, true
 	};
 
 	/* Application loop. */
@@ -726,14 +727,13 @@ int main(int argc, char **argv)
 
 			//Catch Mouse clicks events
 			else if (event.type == SDL_MOUSEBUTTONDOWN) {
-				int mx = event.button.x;
-				int my = event.button.y;
-				printf(" x = %d ", X);
-				printf(" y = %d ", Y);
-				printf(" z = %d ", Z);
-				
-				if(X < 600000000)
-					MeteorStatus[0] = false;
+				//Whenever user clicks, delete a meteor				
+				for (int i = 0; i < 20; i++) {
+					if (MeteorStatus[i] == true) {
+						MeteorStatus[i] = false;
+						break;
+					}
+				}
 			}
 
 			else if(event.type == SDL_KEYDOWN)
@@ -803,15 +803,38 @@ int main(int argc, char **argv)
 
 			// Draw meteors based on whether they have been clicked
 			if (MeteorStatus[0] == true) 
-				DrawMeteor(-1.2, -3.8, -0.7);
+				DrawMeteor(-1.2, -7, -0.7);
 			if (MeteorStatus[1] == true)
-				DrawMeteor(-2, 2.7, 0.1);
+				DrawMeteor(-2, -5, 0.1);
 			if (MeteorStatus[2] == true)
-				DrawMeteor(1.4, -1.3, -0.1);
+				DrawMeteor(1.4, -4, -0.1);
 			if (MeteorStatus[3] == true)
-				DrawMeteor(0.1, 13, 0.4);
+				DrawMeteor(1.1, -2, 0.4);
 			if (MeteorStatus[4] == true)
-				DrawMeteor(1, 8.2, -0.3);
+				DrawMeteor(1, -1, -0.3);
+			if (MeteorStatus[5] == true)
+				DrawMeteor(-1.8, -0.3, 0.1);
+			if (MeteorStatus[6] == true)
+				DrawMeteor(2, 1, -0.4);
+			if (MeteorStatus[7] == true)
+				DrawMeteor(-2, 3, -0.3);
+			if (MeteorStatus[8] == true)
+				DrawMeteor(1.45, 4, -0.23);
+			if (MeteorStatus[9] == true)
+				DrawMeteor(-0.7, 5, -0.5);
+			if (MeteorStatus[10] == true)
+				DrawMeteor(-1.3, 6, -0.4);
+			if (MeteorStatus[11] == true)
+				DrawMeteor(1, 8, -1);
+			if (MeteorStatus[12] == true)
+				DrawMeteor(-1.8, 10, 0.1);
+			if (MeteorStatus[13] == true)
+				DrawMeteor(-1, 12, 0.1);
+			if (MeteorStatus[14] == true)
+				DrawMeteor(1.6, 14, 0.1);
+			if (MeteorStatus[15] == true)
+				DrawMeteor(-1.6, 15, 0.1);
+
 
 			//light position x, y, z, w 
 			//float light_pos[] = { 100.0f, -5.0f, -80.0f, 1.0f };
