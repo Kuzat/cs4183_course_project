@@ -568,38 +568,6 @@ void DrawRoom()
 }
 
 
-/*
-Render Text for Score Keeping
-*/
-void drawBitmapText()
-{
-	// The character array to hole the string
-	char text[] = "HELLO WORLD";
-	// The color, red for me
-	glColor3f(1.0, 0.0, 1.0);
-	// Position of the text to be printer
-	glRasterPos3f(0,0,0);
-	for (int i = 0; text[i] != '\0'; i++)
-		glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
-}
-
-
-void render(void)
-{
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	glLoadIdentity();
-
-	// Write the text before any transformation or rotation
-	// Or the text will change its position with the models
-	drawBitmapText();
-
-
-	glFlush();
-	glutSwapBuffers();
-}
-
-
-
 void lightSettings() {
 	/* Lighting Tests */
 	glLightModeli(GL_LIGHT_MODEL_LOCAL_VIEWER, GL_TRUE);
@@ -760,13 +728,12 @@ int main(int argc, char **argv)
 			else if (event.type == SDL_MOUSEBUTTONDOWN) {
 				int mx = event.button.x;
 				int my = event.button.y;
-				//printf(" x = %d ", mx);
-				//printf(" y = %d ", my);
+				printf(" x = %d ", X);
+				printf(" y = %d ", Y);
+				printf(" z = %d ", Z);
 				
-				printf("before%d ", MeteorStatus[0]);
-				MeteorStatus[0] == false;
-				printf("after%d ", MeteorStatus[0]);
-				DrawMeteor(-1.2, -3.8, -0.7);
+				if(X < 600000000)
+					MeteorStatus[0] = false;
 			}
 
 			else if(event.type == SDL_KEYDOWN)
@@ -834,14 +801,17 @@ int main(int argc, char **argv)
 			DrawAnimatedUranus(0, 8, 0.1);
 			DrawAnimatedNeptune(0, 10, 0.1);
 
-			if (MeteorStatus[0] == false) {
-				printf(" redraw ");
+			// Draw meteors based on whether they have been clicked
+			if (MeteorStatus[0] == true) 
 				DrawMeteor(-1.2, -3.8, -0.7);
-			}
-			DrawMeteor(-2, 2.7, 0.1);
-			DrawMeteor(1.4, -1.3, -0.1);
-			DrawMeteor(0.1, 13, 0.4);
-			DrawMeteor(1, 8.2, -0.3);
+			if (MeteorStatus[1] == true)
+				DrawMeteor(-2, 2.7, 0.1);
+			if (MeteorStatus[2] == true)
+				DrawMeteor(1.4, -1.3, -0.1);
+			if (MeteorStatus[3] == true)
+				DrawMeteor(0.1, 13, 0.4);
+			if (MeteorStatus[4] == true)
+				DrawMeteor(1, 8.2, -0.3);
 
 			//light position x, y, z, w 
 			//float light_pos[] = { 100.0f, -5.0f, -80.0f, 1.0f };
